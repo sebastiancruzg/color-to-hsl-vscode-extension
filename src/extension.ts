@@ -8,6 +8,33 @@ function hexoHsl(hex: string): string {
   return `hsl(${h}, ${s}%, ${l}%)`
 }
 
+function convertAllHexToHsl() {
+  const editor = vscode.window.activeTextEditor
+
+  if (!editor) {
+    vscode.window.showErrorMessage("No active editor found")
+    return
+  }
+
+  const document = editor.document
+  const text = document.getText()
+  const matches = text.matchAll(new RegExp(HEX_REGEX, "g"))
+
+  const edit = new vscode.WorkspaceEdit()
+
+  for (const match of matches) {
+    if (match.index !== undefined) {
+      const startPos = document.positionAt(match.index)
+      const endPos = document.positionAt(match.index + match[0].length)
+      const range = new vscode.Range(startPos, endPos)
+      const hsl = hexoHsl(match[0])
+      edit.replace(document.uri, range, hsl)
+    }
+  }
+
+  vscode.workspace.applyEdit(edit)
+}
+
 export class HexToHslProvider implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [
     vscode.CodeActionKind.Refactor
@@ -51,6 +78,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   )
   context.subscriptions.push(provider)
+
+  const convertAllCommand = vscode.commands.registerCommand(
+    "color-to-hsl.convert-all",
+    convertAllHexToHsl
+  )
+  context.subscriptions.push(convertAllCommand)
 }
 
 export function deactivate() {}
