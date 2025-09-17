@@ -1,42 +1,77 @@
 import convert from "color-convert"
 import * as vscode from "vscode"
 
-const hexRegex = /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g
-export function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "color-to-hsl" is now active!')
+const HEX_REGEX = /#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/
 
-  const disposable = vscode.commands.registerCommand(
-    "color-to-hsl.convert-all",
-    () => {
-      vscode.window.showInformationMessage(
-        "Convert colors from hex or rgb to hsl!"
-      )
-      const editor = vscode.window.activeTextEditor
-      if (editor) {
-        const document = editor.document
-        const text = document.getText()
-        const edits: vscode.TextEdit[] = []
+function hexoHsl(hex: string): string {
+  console.log(hex)
+  const [h, s, l] = convert.hex.hsl(hex.startsWith("#") ? hex.slice(1) : hex)
+  return `hsl(${h}, ${s}%, ${l}%)`
+}
 
-        let match
-        while ((match = hexRegex.exec(text)) !== null) {
-          const hex = match[0]
-          const startPos = document.positionAt(match.index)
-          const endPos = document.positionAt(match.index + hex.length)
-          const range = new vscode.Range(startPos, endPos)
+export class HexToHslProvider implements vscode.CodeActionProvider {
+  public static readonly providedCodeActionKinds = [
+    vscode.CodeActionKind.Refactor
+  ]
 
-          const [h, s, l] = convert.hex.hsl(hex)
-          const hsl = `hsl(${h}, ${s}%, ${l}%)`
+  public provideCodeActions(
+    document: vscode.TextDocument,
+    range: vscode.Range
+  ): vscode.ProviderResult<vscode.CodeAction[]> {
+    console.log("provideCodeActions called with range:", range)
+    console.log("HEX_REGEX:", HEX_REGEX)
 
-          edits.push(vscode.TextEdit.replace(range, hsl))
-        }
+    const wordRange = document.getWordRangeAtPosition(range.start, HEX_REGEX)
+    console.log("wordRange found:", wordRange)
 
-        const workspaceEdit = new vscode.WorkspaceEdit()
-        workspaceEdit.set(document.uri, edits)
-        vscode.workspace.applyEdit(workspaceEdit)
+    if (!wordRange) {
+      console.log("No word range found, returning empty array")
+      return []
+    }
+
+    const selectedText = document.getText(wordRange)
+    console.log("Selected text:", selectedText)
+
+    if (HEX_REGEX.test(selectedText)) {
+      console.log("Text matches HEX_REGEX, converting to HSL")
+      const hsl = hexoHsl(selectedText)
+      if (hsl) {
+        console.log("Conversion successful:", hsl)
+        const action = new vscode.CodeAction(
+          `Convert '${selectedText}' to '${hsl}'`,
+          vscode.CodeActionKind.Refactor
+        )
+
+        action.edit = new vscode.WorkspaceEdit()
+        action.edit.replace(document.uri, wordRange, hsl)
+
+        return [action]
       }
     }
-  )
-  context.subscriptions.push(disposable)
+    console.log("No matching hex color found")
+    return []
+  }
+}
+
+export function activate(context: vscode.ExtensionContext) {
+  const languages = ["css", "scss", "less", "javascript", "typescript", "html"]
+  console.log("Color to HSL extension is activating...")
+
+  // Show a notification to confirm the extension loaded
+  vscode.window.showInformationMessage("Color to HSL extension activated!")
+
+  for (const lang of languages) {
+    const provider = vscode.languages.registerCodeActionsProvider(
+      lang,
+      new HexToHslProvider(),
+      {
+        providedCodeActionKinds: HexToHslProvider.providedCodeActionKinds
+      }
+    )
+    context.subscriptions.push(provider)
+  }
+
+  console.log("Color to HSL extension fully activated!")
 }
 
 export function deactivate() {}

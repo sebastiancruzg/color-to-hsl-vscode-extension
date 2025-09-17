@@ -10,7 +10,14 @@
     "Other"
   ],
   "type": "module",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:scss",
+    "onLanguage:less",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:html"
+  ],
   "main": "./dist/extension.cjs",
   "contributes": {
     "commands": [
