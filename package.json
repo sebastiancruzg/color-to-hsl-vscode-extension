@@ -3,6 +3,10 @@
   "displayName": "Color converter",
   "description": "Color converter",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebastiancruzg/color-converter-vscode-extension"
+  },
   "engines": {
     "vscode": "^1.104.0"
   },
