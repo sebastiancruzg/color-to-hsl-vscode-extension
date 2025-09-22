@@ -1,8 +1,8 @@
 {
-  "name": "color-converter",
+  "name": "color-action-converter",
   "displayName": "Color converter",
   "description": "Color converter",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/sebastiancruzg/color-converter-vscode-extension"
@@ -10,11 +10,12 @@
   "engines": {
     "vscode": "^1.104.0"
   },
+  "publisher": "cbi64",
   "categories": [
     "Other"
   ],
   "type": "module",
-  "main": "./dist/extension.cjs",
+  "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage"
   ],
