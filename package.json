@@ -1,7 +1,7 @@
 {
-  "name": "color-to-hsl",
-  "displayName": "Color to hsl",
-  "description": "Convert hex and rgb to hsl with commands",
+  "name": "color-converter",
+  "displayName": "Color converter",
+  "description": "Color converter",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.104.0"
@@ -17,8 +17,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "color-to-hsl.convert-all",
-        "title": "Convert colors"
+        "command": "color-converter.convert-to-hsl",
+        "title": "Convert colors to HSL"
       }
     ]
   },

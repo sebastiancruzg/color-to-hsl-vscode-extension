@@ -80,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(provider)
 
   const convertAllCommand = vscode.commands.registerCommand(
-    "color-to-hsl.convert-all",
+    "color-converter.convert-to-hsl",
     convertAllHexToHsl
   )
   context.subscriptions.push(convertAllCommand)
