@@ -1,14 +1,16 @@
-import convert from "color-convert"
 import * as vscode from "vscode"
 
 const HEX_REGEX = /#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/
 
-function hexoHsl(hex: string): string {
-  const [h, s, l] = convert.hex.hsl(hex.startsWith("#") ? hex.slice(1) : hex)
+async function hexoHsl(hex: string): Promise<string> {
+  const convert = await import("color-convert")
+  const [h, s, l] = convert.default.hex.hsl(
+    hex.startsWith("#") ? hex.slice(1) : hex
+  )
   return `hsl(${h}, ${s}%, ${l}%)`
 }
 
-function convertAllHexToHsl() {
+async function convertAllHexToHsl() {
   const editor = vscode.window.activeTextEditor
 
   if (!editor) {
@@ -27,7 +29,7 @@ function convertAllHexToHsl() {
       const startPos = document.positionAt(match.index)
       const endPos = document.positionAt(match.index + match[0].length)
       const range = new vscode.Range(startPos, endPos)
-      const hsl = hexoHsl(match[0])
+      const hsl = await hexoHsl(match[0])
       edit.replace(document.uri, range, hsl)
     }
   }
@@ -40,10 +42,10 @@ export class HexToHslProvider implements vscode.CodeActionProvider {
     vscode.CodeActionKind.Refactor
   ]
 
-  public provideCodeActions(
+  public async provideCodeActions(
     document: vscode.TextDocument,
     range: vscode.Range
-  ): vscode.ProviderResult<vscode.CodeAction[]> {
+  ): Promise<vscode.CodeAction[]> {
     const wordRange = document.getWordRangeAtPosition(range.start, HEX_REGEX)
 
     if (!wordRange) {
@@ -56,7 +58,7 @@ export class HexToHslProvider implements vscode.CodeActionProvider {
       return []
     }
 
-    const hsl = hexoHsl(selectedText)
+    const hsl = await hexoHsl(selectedText)
     const action = new vscode.CodeAction(
       `Convert '${selectedText}' to '${hsl}'`,
       vscode.CodeActionKind.Refactor
